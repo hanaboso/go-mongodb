@@ -6,6 +6,7 @@ services:
         user: ${DEV_UID}:${DEV_GID}
         volumes:
             - ./:/go-mongodb
+            - ${GOPATH}/pkg:/go/pkg
             - ${DOCKER_SOCKET_PATH}:/var/run/docker.sock
         environment:
             DEV_UID: ${DEV_UID}

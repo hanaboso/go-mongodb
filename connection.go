@@ -23,10 +23,7 @@ func (connection *Connection) Connect(dsn string) {
 	connectionString, err := connstring.Parse(dsn)
 
 	if err != nil {
-		fmt.Println(fmt.Sprintf(errorFormat, err))
-		connection.Connect(dsn)
-
-		return
+		panic(fmt.Sprintf(errorFormat, err))
 	}
 
 	client, err := mongo.NewClient(options.Client().ApplyURI(dsn))
