@@ -1,4 +1,5 @@
-module github.com/hanaboso-go/mongodb
+// module github.com/hanaboso-go/mongodb
+module gitlab.hanaboso.net/hanaboso/go-mongodb
 
 go 1.13
 
