@@ -1,0 +1,29 @@
+stages:
+    - build
+    - test
+    - cleanup
+
+before_script:
+    - eval $(ssh-agent)
+    - ssh-add ~/.ssh/bob_the_builder_hanaboso
+
+build:
+    stage: build
+    script:
+        - make build TAG=${CI_BUILD_REF_NAME}
+    only:
+        - dev
+        - master
+
+test:
+    stage: test
+    script:
+        - export COMPOSE_FILE=docker-compose.ci.yml
+        - make ${COMPOSE_FILE} test
+
+cleanup:
+    stage: cleanup
+    when: always
+    script:
+        - export COMPOSE_FILE=docker-compose.ci.yml
+        - make ${COMPOSE_FILE} docker-down-clean || echo "CleanUP failed"
