@@ -1,0 +1,25 @@
+version: '3.5'
+
+services:
+    app:
+        image: dkr.hanaboso.net/hanaboso/go-mongodb:dev
+        user: ${DEV_UID}:${DEV_GID}
+        volumes:
+            - ./:/go-mongodb
+            - ${GOPATH}/pkg:/go/pkg
+            - ${DOCKER_SOCKET_PATH}:/var/run/docker.sock
+        environment:
+            DEV_UID: ${DEV_UID}
+            DEV_GID: ${DEV_GID}
+            GITLAB_CI: ${GITLAB_CI}
+            MONGO_DSN: mongodb://mongodb/database?connectTimeoutMS=2500&serverSelectionTimeoutMS=2500&socketTimeoutMS=2500&heartbeatFrequencyMS=2500
+
+    mongodb:
+        image: mongo:latest
+        ports:
+            - ${DEV_IP}:27017:27017
+        volumes:
+            - mongodb:/data/db
+
+volumes:
+    mongodb:
