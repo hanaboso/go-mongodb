@@ -3,6 +3,7 @@ package mongodb
 import (
 	"context"
 	"fmt"
+	"log"
 	"sort"
 	"time"
 
@@ -30,21 +31,21 @@ func (connection *Connection) Connect(dsn string) {
 	client, err := mongo.NewClient(options.Client().ApplyURI(dsn))
 
 	if err != nil {
-		fmt.Println(fmt.Sprintf(errorFormat, err))
+		log.Println(fmt.Sprintf(errorFormat, err))
 		connection.Connect(dsn)
 
 		return
 	}
 
 	if err := client.Connect(context.Background()); err != nil {
-		fmt.Println(fmt.Sprintf(errorFormat, err))
+		log.Println(fmt.Sprintf(errorFormat, err))
 		connection.Connect(dsn)
 
 		return
 	}
 
 	if err := client.Ping(context.Background(), nil); err != nil {
-		fmt.Println(fmt.Sprintf(errorFormat, err))
+		log.Println(fmt.Sprintf(errorFormat, err))
 		connection.Connect(dsn)
 
 		return
@@ -59,7 +60,7 @@ func (connection *Connection) Disconnect() {
 	err := connection.Database.Client().Disconnect(context.Background())
 
 	if err != nil {
-		fmt.Println(fmt.Sprintf(errorFormat, err))
+		log.Println(fmt.Sprintf(errorFormat, err))
 		connection.Disconnect()
 
 		return

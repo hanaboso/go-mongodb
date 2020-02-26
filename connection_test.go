@@ -12,7 +12,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-const dsn = "MONGO_DSN"
 const stop = "stop"
 const start = "start"
 const docker = "docker"
@@ -22,7 +21,7 @@ const collection = "Collection"
 var connection = Connection{}
 
 func TestConnect(t *testing.T) {
-	connection.Connect(os.Getenv(dsn))
+	connection.Connect(getDsn())
 	_ = connection.Database.Drop(context.Background())
 
 	innerContext, cancel := connection.Context()
@@ -40,7 +39,7 @@ func TestConnect(t *testing.T) {
 }
 
 func TestDisconnect(t *testing.T) {
-	connection.Connect(os.Getenv(dsn))
+	connection.Connect(getDsn())
 	_ = connection.Database.Drop(context.Background())
 
 	connection.Disconnect()
@@ -53,7 +52,7 @@ func TestIsConnected(t *testing.T) {
 		t.Skip()
 	}
 
-	connection.Connect(os.Getenv(dsn))
+	connection.Connect(getDsn())
 	_ = connection.Database.Drop(context.Background())
 	assert.True(t, connection.IsConnected())
 
@@ -73,7 +72,7 @@ func TestConnectError(t *testing.T) {
 		}
 	}()
 
-	connection.Connect(os.Getenv(dsn))
+	connection.Connect(getDsn())
 	_ = connection.Database.Drop(context.Background())
 
 	innerContext, cancel := connection.Context()
@@ -96,4 +95,12 @@ func getInsertedID(result *mongo.InsertOneResult) string {
 
 func getSelectedID(result interface{}) string {
 	return result.(primitive.D).Map()["_id"].(primitive.ObjectID).Hex()
+}
+
+func getDsn() string {
+	if dsn := os.Getenv("MONGO_DSN"); dsn != "" {
+		return dsn
+	}
+
+	return "mongodb://127.0.0.25/database?connectTimeoutMS=2500&serverSelectionTimeoutMS=2500&socketTimeoutMS=2500&heartbeatFrequencyMS=2500"
 }
