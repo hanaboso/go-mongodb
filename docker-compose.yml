@@ -2,10 +2,10 @@ version: '3.5'
 
 services:
     app:
-        image: dkr.hanaboso.net/hanaboso/go-mongodb:dev
+        image: hanabosocom/go-base:dev
         user: ${DEV_UID}:${DEV_GID}
         volumes:
-            - ./:/go-mongodb
+            - ./:/app
             - ${GOPATH}/pkg:/go/pkg
             - ${DOCKER_SOCKET_PATH}:/var/run/docker.sock
         environment:
