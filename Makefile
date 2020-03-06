@@ -9,10 +9,6 @@ IMAGE=dkr.hanaboso.net/hanaboso/go-mongodb
 		-e 's|{DOCKER_SOCKET_PATH}|$(shell test -S /var/run/docker-$${USER}.sock && echo /var/run/docker-$${USER}.sock || echo /var/run/docker.sock)|g' \
 		.env.dist >> .env; \
 
-build:
-	docker build -t ${IMAGE}:${TAG} .
-	docker push ${IMAGE}:${TAG}
-
 docker-up-force: .env
 	$(DC) pull
 	$(DC) up -d --force-recreate --remove-orphans
@@ -27,6 +23,7 @@ docker-compose.ci.yml:
 go-update:
 	$(DE) su-exec root go get -u all
 	$(DE) su-exec root go mod tidy
+	$(DE) su-exec root chown dev:dev go.mod go.sum
 
 init-dev: docker-up-force
 	$(DE) go mod download
