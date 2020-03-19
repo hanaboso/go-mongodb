@@ -11,7 +11,6 @@ services:
         environment:
             DEV_UID: ${DEV_UID}
             DEV_GID: ${DEV_GID}
-            GITLAB_CI: ${GITLAB_CI}
             MONGO_DSN: mongodb://mongodb/database?connectTimeoutMS=2500&serverSelectionTimeoutMS=2500&socketTimeoutMS=2500&heartbeatFrequencyMS=2500
 
     mongodb:

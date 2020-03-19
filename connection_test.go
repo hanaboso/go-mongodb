@@ -15,6 +15,8 @@ import (
 const stop = "stop"
 const start = "start"
 const docker = "docker"
+const sudo = "su-exec"
+const user = "root"
 const container = "go-mongodb_mongodb_1"
 const collection = "Collection"
 
@@ -48,27 +50,23 @@ func TestDisconnect(t *testing.T) {
 }
 
 func TestIsConnected(t *testing.T) {
-	if os.Getenv("GITLAB_CI") == "true" {
-		t.Skip()
-	}
-
 	connection.Connect(getDsn())
 	_ = connection.Database.Drop(context.Background())
 	assert.True(t, connection.IsConnected())
 
-	_ = exec.Command(docker, stop, container).Run()
+	_ = getCmdContext(stop).Run()
 	assert.False(t, connection.IsConnected())
 
-	_ = exec.Command(docker, start, container).Run()
+	_ = getCmdContext(start).Run()
 	assert.True(t, connection.IsConnected())
 }
 
 func TestConnectError(t *testing.T) {
-	_ = exec.Command(docker, stop, container).Run()
+	_ = getCmdContext(stop).Run()
 
 	go func() {
 		for range time.After(time.Second) {
-			_ = exec.Command(docker, start, container).Run()
+			_ = getCmdContext(start).Run()
 		}
 	}()
 
@@ -103,4 +101,8 @@ func getDsn() string {
 	}
 
 	return "mongodb://127.0.0.25/database?connectTimeoutMS=2500&serverSelectionTimeoutMS=2500&socketTimeoutMS=2500&heartbeatFrequencyMS=2500"
+}
+
+func getCmdContext(action string) *exec.Cmd {
+	return exec.Command(sudo, user, docker, action, container)
 }
