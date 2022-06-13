@@ -81,6 +81,11 @@ func (connection *Connection) Context() (context.Context, context.CancelFunc) {
 	return context.WithTimeout(context.Background(), connection.timeout)
 }
 
+// StartSession creates session
+func (connection *Connection) StartSession(options ...*options.SessionOptions) (mongo.Session, error) {
+	return connection.Database.Client().StartSession(options...)
+}
+
 func getTimeout(connectionString connstring.ConnString) time.Duration {
 	timeouts := []int{
 		int(connectionString.ConnectTimeout.Milliseconds()),
