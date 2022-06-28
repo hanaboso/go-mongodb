@@ -95,7 +95,11 @@ func getTimeout(connectionString connstring.ConnString) time.Duration {
 
 	sort.Ints(timeouts)
 
-	return time.Duration(timeouts[len(timeouts)-1]) * time.Millisecond
+	if timeout := time.Duration(timeouts[len(timeouts)-1]) * time.Millisecond; timeout > 0 {
+		return timeout
+	}
+
+	return 2500
 }
 
 func (connection *Connection) logContext() log.Logger {
