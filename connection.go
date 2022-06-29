@@ -99,7 +99,7 @@ func getTimeout(connectionString connstring.ConnString) time.Duration {
 		return timeout
 	}
 
-	return 2500
+	return 25 * time.Second
 }
 
 func (connection *Connection) logContext() log.Logger {
