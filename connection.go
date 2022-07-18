@@ -35,22 +35,19 @@ func (connection *Connection) Connect(dsn string) {
 	client, err := mongo.NewClient(options.Client().ApplyURI(dsn))
 
 	if err != nil {
-		connection.logContext().Error(err)
-		connection.Connect(dsn)
+		connection.reconnect(dsn, err)
 
 		return
 	}
 
 	if err := client.Connect(context.Background()); err != nil {
-		connection.logContext().Error(err)
-		connection.Connect(dsn)
+		connection.reconnect(dsn, err)
 
 		return
 	}
 
 	if err := client.Ping(context.Background(), nil); err != nil {
-		connection.logContext().Error(err)
-		connection.Connect(dsn)
+		connection.reconnect(dsn, err)
 
 		return
 	}
@@ -106,4 +103,10 @@ func (connection *Connection) logContext() log.Logger {
 	return connection.Log.WithFields(map[string]interface{}{
 		"package": "MongoDB",
 	})
+}
+
+func (connection *Connection) reconnect(dsn string, err error) {
+	connection.logContext().Error(err)
+	time.Sleep(createBackOff(5*time.Second, 60*time.Second, 5, false).Duration())
+	connection.Connect(dsn)
 }
