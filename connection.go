@@ -33,20 +33,24 @@ func (connection *Connection) Connect(dsn string) {
 	}
 
 	client, err := mongo.NewClient(options.Client().ApplyURI(dsn))
-
 	if err != nil {
+		connection.Log.Error(err)
 		connection.reconnect(dsn, err)
 
 		return
 	}
 
 	if err := client.Connect(context.Background()); err != nil {
+		_ = client.Disconnect(context.Background())
+		connection.Log.Error(err)
 		connection.reconnect(dsn, err)
 
 		return
 	}
 
 	if err := client.Ping(context.Background(), nil); err != nil {
+		_ = client.Disconnect(context.Background())
+		connection.Log.Error(err)
 		connection.reconnect(dsn, err)
 
 		return
