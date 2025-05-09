@@ -1,8 +1,6 @@
-version: '3.5'
-
 services:
     app:
-        image: hanabosocom/go-base:1.19
+        image: hanabosocom/go-base:1.24
         user: ${DEV_UID}:${DEV_GID}
         volumes:
             - ./:/app
@@ -15,6 +13,7 @@ services:
 
     mongodb:
         image: mongo:latest
+        container_name: go-mongodb-mongodb
         ports:
             - ${DEV_IP}:27017:27017
         volumes:

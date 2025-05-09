@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"github.com/hanaboso/go-log/pkg/zap"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/x/mongo/driver/connstring"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/x/mongo/driver/connstring"
 
 	log "github.com/hanaboso/go-log/pkg"
 )
@@ -32,16 +32,8 @@ func (connection *Connection) Connect(dsn string) {
 		connection.logContext().Error(err)
 	}
 
-	client, err := mongo.NewClient(options.Client().ApplyURI(dsn))
+	client, err := mongo.Connect(options.Client().ApplyURI(dsn))
 	if err != nil {
-		connection.Log.Error(err)
-		connection.reconnect(dsn, err)
-
-		return
-	}
-
-	if err := client.Connect(context.Background()); err != nil {
-		_ = client.Disconnect(context.Background())
 		connection.Log.Error(err)
 		connection.reconnect(dsn, err)
 
@@ -83,11 +75,11 @@ func (connection *Connection) Context() (context.Context, context.CancelFunc) {
 }
 
 // StartSession creates session
-func (connection *Connection) StartSession(options ...*options.SessionOptions) (mongo.Session, error) {
+func (connection *Connection) StartSession(options ...options.Lister[options.SessionOptions]) (*mongo.Session, error) {
 	return connection.Database.Client().StartSession(options...)
 }
 
-func getTimeout(connectionString connstring.ConnString) time.Duration {
+func getTimeout(connectionString *connstring.ConnString) time.Duration {
 	timeouts := []int{
 		int(connectionString.ConnectTimeout.Milliseconds()),
 		int(connectionString.SocketTimeout.Milliseconds()),

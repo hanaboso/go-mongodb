@@ -2,14 +2,15 @@ package mongodb
 
 import (
 	"context"
+	"log"
 	"os"
 	"os/exec"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 const stop = "stop"
@@ -17,7 +18,7 @@ const start = "start"
 const docker = "docker"
 const sudo = "su-exec"
 const user = "root"
-const container = "go-mongodb_mongodb_1"
+const container = "go-mongodb-mongodb"
 const collection = "Collection"
 
 var connection = Connection{}
@@ -34,7 +35,7 @@ func TestConnect(t *testing.T) {
 	assert.NotNil(t, document)
 
 	var result interface{}
-	err = connection.Database.Collection(collection).FindOne(innerContext, primitive.D{{"key", "value"}}).Decode(&result)
+	err = connection.Database.Collection(collection).FindOne(innerContext, bson.D{{"key", "value"}}).Decode(&result)
 
 	assert.Nil(t, err)
 	assert.Equal(t, getInsertedID(document), getSelectedID(result))
@@ -54,7 +55,8 @@ func TestIsConnected(t *testing.T) {
 	_ = connection.Database.Drop(context.Background())
 	assert.True(t, connection.IsConnected())
 
-	_ = getCmdContext(stop).Run()
+	err := getCmdContext(stop).Run()
+	log.Printf("Command finished with error: %v", err)
 	assert.False(t, connection.IsConnected())
 
 	_ = getCmdContext(start).Run()
@@ -81,18 +83,28 @@ func TestConnectError(t *testing.T) {
 	assert.NotNil(t, document)
 
 	var result interface{}
-	err = connection.Database.Collection(collection).FindOne(innerContext, primitive.D{{"key", "value"}}).Decode(&result)
+	err = connection.Database.Collection(collection).FindOne(innerContext, bson.D{{"key", "value"}}).Decode(&result)
 
 	assert.Nil(t, err)
 	assert.Equal(t, getInsertedID(document), getSelectedID(result))
 }
 
 func getInsertedID(result *mongo.InsertOneResult) string {
-	return result.InsertedID.(primitive.ObjectID).Hex()
+	return result.InsertedID.(bson.ObjectID).Hex()
 }
 
 func getSelectedID(result interface{}) string {
-	return result.(primitive.D).Map()["_id"].(primitive.ObjectID).Hex()
+
+	type Result struct {
+		ID bson.ObjectID `bson:"_id"`
+	}
+
+	var a Result
+
+	val, _ := bson.Marshal(result)
+	_ = bson.Unmarshal(val, &a)
+
+	return a.ID.Hex()
 }
 
 func getDsn() string {
@@ -100,7 +112,7 @@ func getDsn() string {
 		return dsn
 	}
 
-	return "mongodb://127.0.0.25/database?connectTimeoutMS=2500&serverSelectionTimeoutMS=2500&socketTimeoutMS=2500&heartbeatFrequencyMS=2500"
+	return "mongodb://127.0.0.1/database?connectTimeoutMS=2500&serverSelectionTimeoutMS=2500&socketTimeoutMS=2500&heartbeatFrequencyMS=2500"
 }
 
 func getCmdContext(action string) *exec.Cmd {

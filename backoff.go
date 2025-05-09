@@ -1,3 +1,4 @@
+// Package mongodb backoff
 package mongodb
 
 import (
@@ -10,10 +11,10 @@ func defaultBackOff() *backoff.Backoff {
 	return createBackOff(100*time.Millisecond, 2*time.Minute, 2, true)
 }
 
-func createBackOff(min time.Duration, max time.Duration, factor float64, jitter bool) *backoff.Backoff {
+func createBackOff(low time.Duration, high time.Duration, factor float64, jitter bool) *backoff.Backoff {
 	return &backoff.Backoff{
-		Min:    min,
-		Max:    max,
+		Min:    low,
+		Max:    high,
 		Factor: factor,
 		Jitter: jitter,
 	}
