@@ -35,7 +35,7 @@ func TestConnect(t *testing.T) {
 	assert.NotNil(t, document)
 
 	var result interface{}
-	err = connection.Database.Collection(collection).FindOne(innerContext, bson.D{{"key", "value"}}).Decode(&result)
+	err = connection.Database.Collection(collection).FindOne(innerContext, bson.D{{Key: "key", Value: "value"}}).Decode(&result)
 
 	assert.Nil(t, err)
 	assert.Equal(t, getInsertedID(document), getSelectedID(result))
@@ -83,7 +83,7 @@ func TestConnectError(t *testing.T) {
 	assert.NotNil(t, document)
 
 	var result interface{}
-	err = connection.Database.Collection(collection).FindOne(innerContext, bson.D{{"key", "value"}}).Decode(&result)
+	err = connection.Database.Collection(collection).FindOne(innerContext, bson.D{{Key: "key", Value: "value"}}).Decode(&result)
 
 	assert.Nil(t, err)
 	assert.Equal(t, getInsertedID(document), getSelectedID(result))
